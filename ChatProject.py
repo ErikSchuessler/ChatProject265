@@ -4,53 +4,108 @@ from Talk import Talk
 import threading
 import sys
 
-windowHeight0 = 300
+windowHeight0 = 700
 windowWidth0 = 300
 windowHeight = 500
 windowWidth = 500
-endButtonXPos = 100
-sendButtonXPos = 400
 
+name = "ME"
 ServerIP = "localhost"
-ServerPort = 12001
 OwnPort = 12002
+ServerPort = 12001
 
 
-def on_notify():
-      print("OK, I'm up-to-date")
+def on_notify(message):
+    receive(message)
+
+def endStartup():
+    global root0   
+    root0.destroy()
+
+def setName(nameToSet):
+    global name
+    name = nameToSet
+
+def setOwnPort(ownPortToSet):
+    global OwnPort
+    OwnPort = ownPortToSet
+
+def setServerPort(serverPortToSet):
+    global ServerPort
+    ServerPort = serverPortToSet
 
 
-#root0 = tk.Tk()
+root0 = tk.Tk()
 
-#canvas0 = tk.Canvas(root0, height=windowHeight0, width=windowWidth0)
-#canvas0.pack()
+canvas0 = tk.Canvas(root0, height=windowHeight0, width=windowWidth0)
+canvas0.pack()
 
-#frame0 = tk.Frame(root0, bg='#d6d6d6')
-#frame0.place(relwidth=1, relheight=1)
+frame0 = tk.Frame(root0, bg='#d6d6d6')
+frame0.place(relwidth=1, relheight=1)
 
-#label = tk.Label(frame0, text="Welcome to IM Chat 2020")
-#label.pack(anchor='center')
+label = tk.Label(frame0, text="Welcome to IM Chat 2020")
+label.pack(anchor='center')
 
-#label = tk.Label(frame0, text="Who would you like to chat with?")
-#label.pack(anchor='center', side='bottom')
+##Name Entry
 
-#nameEntry = tk.Entry(frame0)
-#nameEntry.place(relwidth=0.85, relheigh=0.1, relx=0.075, rely=0.7)
+nameQLabel = tk.Label(frame0, text="What is your name?")
+nameQLabel.place(relwidth = 0.85, relheight = 0.1, relx=0.075, rely=0.1)
+
+nameEntry = tk.Entry(frame0)
+nameEntry.place(relwidth=0.775, relheigh=0.03, relx=0.075, rely=0.2)
+
+nameEnterButton = tk.Button(root0, text="Enter", command= lambda: setName(nameEntry.get()))
+nameEnterButton.place(relwidth=0.225, relheigh=0.03, relx=0.7, rely=0.2)
+
+##Own Port Entry
+
+ownPortQLabel = tk.Label(frame0, text="What is YOUR port number?")
+ownPortQLabel.place(relwidth = 0.85, relheight = 0.1, relx=0.075, rely=0.25)
+
+ownPortEntry = tk.Entry(frame0)
+ownPortEntry.place(relwidth=0.775, relheigh=0.03, relx=0.075, rely=0.35)
+
+ownPortEnterButton = tk.Button(root0, text = "Enter", command= lambda: setOwnPort(ownPortEntry.get()))
+ownPortEnterButton.place(relwidth=0.225, relheigh=0.03, relx=0.7, rely=0.35)
+
+##ServerPortEntry
+
+serverPortQLabel = tk.Label(frame0, text="What is THEIR port number?")
+serverPortQLabel.place(relwidth = 0.85, relheight = 0.1, relx=0.075, rely=0.40)
+
+serverPortEntry = tk.Entry(frame0)
+serverPortEntry.place(relwidth=0.775, relheigh=0.03, relx=0.075, rely=0.5)
+
+serverPortEnterButton = tk.Button(root0, text = "Enter", command= lambda: setServerPort(serverPortEntry.get()))
+serverPortEnterButton.place(relwidth=0.225, relheigh=0.03, relx=0.7, rely=0.5)
+
+##Begin chat
+
+EnterButton = tk.Button(root0, text = "Begin chatting!", command= endStartup)
+EnterButton.place(relwidth=0.85, relheigh=0.2, relx=0.075, rely=0.6)
 
 
-#root0.mainloop()
+root0.mainloop()
 
 root = tk.Tk()
 
 
-def send(textEntry):
-    messageBox.config(text="[ME:] "+ textEntry, anchor='nw')
-    print("You sent:", textEntry)
+
+def receive(message):
+    newMessage = messageBox.cget("text") + '\n' + message
+    messageBox.config(text= newMessage, anchor='nw')
+
+
+def send(name, textEntry):
+    newMessageToPrint = messageBox.cget("text") + '\n' + "[" + name + ":] " + textEntry
+    newMessageToSend = "["+name+":] "+ textEntry
+    messageBox.config(text=newMessageToPrint, anchor='nw')
+    talk1.clientFunction(newMessageToSend)
+   
 
 def endChat():
     global root
-    root.quit()
-    print("Chat ended.")
+    root.destroy()
 
 # put event handler here - just a method that handles events
 
@@ -73,12 +128,13 @@ textEntry.place(relwidth=0.85, relheigh=0.1, relx=0.075, rely=0.7)
 endChatButton = tk.Button(root, text="End Chat", command=endChat)
 endChatButton.place(relwidth=0.2,relheigh=0.1, relx=0.075, rely=0.83)
 
-sendButton = tk.Button(root, text="Send", command= lambda: send(textEntry.get()))
+sendButton = tk.Button(root, text="Send", command= lambda: send(name, textEntry.get()))
 sendButton.place(relwidth=0.2,relheigh=0.1, relx=0.725, rely=0.83)
 
-talk1 = Talk(ServerIP,ServerPort,OwnPort)
+talk1 = Talk(ServerIP,ServerPort,OwnPort, on_notify)
 
-talk1.do_something(on_notify)
+
+
 talk1.run()
 
 #register event handler for the event you are raising in Talk
@@ -86,4 +142,3 @@ talk1.run()
 
 
 root.mainloop()
-
